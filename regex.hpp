@@ -68,6 +68,7 @@ public:
 		if (rc <= 0)
 		{
 			ClearMatch();
+			pcre2_match_data_free(pMatchData);
 
 			if (rc == PCRE2_ERROR_NOMATCH)
 				return 0;
