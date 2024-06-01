@@ -1,0 +1,35 @@
+set_languages("c99", "cxx17")
+set_toolchains("clang")
+
+target("pcre2")
+    set_kind("static")
+	add_includedirs("../src")
+	add_files("../src/*.c")
+	add_defines("HAVE_CONFIG_H", "PCRE2_CODE_UNIT_WIDTH=8")
+	add_cxflags("-fPIC", "-O3", "-g3")
+
+target("pcre2posix_test")
+	set_kind("binary")
+	add_deps("pcre2")
+	add_includedirs("../src")
+	add_files("pcre2posix_test.c")
+	add_defines("HAVE_CONFIG_H", "PCRE2_CODE_UNIT_WIDTH=8")
+	add_cxflags("-O3", "-g3")
+
+target("pcre2demo")
+	set_kind("binary")
+	add_deps("pcre2")
+	add_includedirs("../src")
+	add_files("pcre2demo.c")
+	add_defines("HAVE_CONFIG_H", "PCRE2_CODE_UNIT_WIDTH=8")
+	add_cxflags("-O3", "-g3")
+
+target("regtest")
+	set_kind("binary")
+	add_deps("pcre2")
+	add_includedirs("../src")
+	add_files("regtest.cpp")
+	add_defines("HAVE_CONFIG_H", "PCRE2_CODE_UNIT_WIDTH=8")
+	add_cxflags("-O3", "-g3")
+
+
