@@ -1,5 +1,4 @@
-#ifndef REGEX_HPP
-#define REGEX_HPP
+#pragma once
 
 #include <stdio.h>
 #include <string.h>
@@ -11,6 +10,11 @@
 #endif
 
 #define _MAX_MATCHES (MAX_MATCHES)
+
+#define MATCHOFFSET_START	0
+#define MATCHOFFSET_END		1
+
+namespace fdxx {
 
 struct RegexMatch
 {
@@ -192,6 +196,25 @@ public:
 		return substrLen;
 	}
 
+	// need delete[] return value.
+	char *GetSubString(int strid, int match = 0)
+	{
+		if (match >= m_iMatchCount || strid >= m_Matches[match].m_iSubStringCount)
+		{
+			printf("Invalid match index or str_id passed.\n");
+			return 0;
+		}
+
+		const char *substr = m_String + m_Matches[match].m_offsetVector[2 * strid];
+		int substrLen = m_Matches[match].m_offsetVector[2 * strid + 1] - m_Matches[match].m_offsetVector[2 * strid];
+
+		char *buffer = new char[substrLen+1];
+		memcpy(buffer, substr, substrLen);
+
+		buffer[substrLen] = '\0';
+		return buffer;
+	}
+
 	// Returns number of matches
 	//
 	// When using Match this is always 1 or 0 (unless an error occured)
@@ -220,14 +243,13 @@ public:
 
 	// Returns the string offset of a match.
 	//
+	// @param pos           0=start, 1=end.
 	// @param match         Match to get the offset of. Match starts at 0, and ends at MatchCount() -1
-	// @param pos           0=start, 1=ends.
 	// @return              Offset of the match in the string.
-	int MatchOffset(int match = 0, int pos = 1)
+	int MatchOffset(int pos = MATCHOFFSET_END, int match = 0)
 	{
 		return m_Matches[match].m_offsetVector[pos];
 	}
-
 
 public:
 	int m_iMatchCount;
@@ -238,17 +260,9 @@ private:
 	{
 		if (m_PcreCode)
 			pcre2_code_free(m_PcreCode);
-		if (m_String)
-			free(m_String);
 		m_PcreCode = nullptr;
-		m_String = nullptr;
-		m_iMatchCount = 0;
 
-		for (int i = 0; i < _MAX_MATCHES; i++)
-		{
-			m_Matches[i].m_iSubStringCount = 0;
-			delete[] m_Matches[i].m_offsetVector;
-		}
+		ClearMatch();
 	}
 
 	void ClearMatch()
@@ -262,6 +276,7 @@ private:
 		{
 			m_Matches[i].m_iSubStringCount = 0;
 			delete[] m_Matches[i].m_offsetVector;
+			m_Matches[i].m_offsetVector = nullptr;
 		}
 	}
 
@@ -269,4 +284,4 @@ private:
 	char *m_String = nullptr;
 };
 
-#endif /* REGEX_HPP */
+} // namespace fdxx
